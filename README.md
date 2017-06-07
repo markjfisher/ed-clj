@@ -2,6 +2,46 @@
 
 A Clojure library for Elite Dangerous Tools
 
+## DEV WALKTHROUGH
+
+In intellij, start a repl for the project.
+Run the following to load all the 'state'
+
+    (dev)  ;; puts you in dev namespace with application loaded
+    (go)   ;; loads the state objects, e.g. config, *db*
+
+You can now run d/b functions etc from ed.db namespace, e.g.
+
+    (ed.db/get-faction {:id 0})
+
+You can setup a clean database with:
+
+    (ed.db/drop-db-tables!)
+    (ed.db/create-db-tables!)
+
+Done some code changes and want to reload it?
+
+    (reset)
+
+See also (refresh) and (refresh-all) which require you to start
+the application state again (e.g. with "(go)")
+
+## Command Line Startup
+
+To run the application from the command line:
+
+    $ lein godev
+
+Currently this will drop all tables and recreate them in a pgsql
+database named 'ed-factions', with user 'ed'.
+See the config.edn files for d/b etc config.
+
+
+## DONE
+
+- database definitions
+- dev environment
+
 ## TODO
 
 1. Import all factions: populate 'factions' (key: faction_id, updated_at)
