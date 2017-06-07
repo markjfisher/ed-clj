@@ -17,11 +17,11 @@
   :register-mbeans    false}
 
  :timbre
- {:level :info}
+ {:level :error}
 
  :nrepl
  {:host "0.0.0.0"
-  :port 0}
+  :port 7878}
 
  :eddb
  {:url "tcp://eddn-relay.elite-markets.net:9500"}}

@@ -1,5 +1,5 @@
 (ns dev
-  (:require [mount.core :refer [start stop]]
+  (:require [mount.core :as mount]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :as tn]
 
@@ -7,20 +7,20 @@
             [mount.core :as mount :refer [defstate]]
             [mount.tools.graph :refer [states-with-deps]]
 
-            [ed.db :refer [config *db*]]
-            #_[app.example]
-            ;; <<<< replace this your "app" namespace(s) you want to be available at REPL time
-            #_[app.nyse :refer [find-orders add-order]]
-
+            [ed.errors]
+            [ed.conf :refer [config]]
+            [ed.db :refer [*db*]]
+            [ed.server :refer [nrepl]]
+            [ed.schema]
+            [ed.util]
+            [ed.zip]
+            [ed.zmq]
             ))
 
-
+;; don't start the nrepl service as we're probably running in intellij repl
 (defn start []
-  #_(with-logging-status)
-  (mount/start #'app.conf/config
-               #'app.db/conn
-               #'app.www/nyse-app
-               #'app.example/nrepl))             ;; example on how to start app with certain states
+  (mount/start #'ed.conf/config
+               #'ed.db/*db*))
 
 (defn stop []
   (mount/stop))

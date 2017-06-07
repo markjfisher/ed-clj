@@ -18,8 +18,7 @@
   []
   ;; isolate the exception to test if table exists by selecting from it.
   (try (get-faction {:id 0}) true
-       (catch Exception e (do (errorf "caught exception: %s" (.getMessage e))
-                              false))))
+       (catch Exception _ false)))
 
 (defn drop-db-tables!
   "Drops all database tables"
