@@ -1,0 +1,4 @@
+{:clojure :rocks
+ :foo :bar
+ :a 1
+ :b [2 3]}

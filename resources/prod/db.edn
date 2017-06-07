@@ -1,0 +1,8 @@
+{:subprotocol "postgresql"
+ :classname "org.postgresql.Driver"
+ :subname "//localhost:5432/ed-factions"
+ :user "ed"
+ :password "ed"
+ :min-pool-size 3
+ :initial-pool-size 3
+}
