@@ -12,14 +12,9 @@
    (s/required-key :allegiance-id)     s/Int
    (s/required-key :allegiance)        s/Str
    (s/required-key :home-system-id)    s/Int
-   (s/required-key :is-player-faction) s/Bool})
-
-(def FactionStateSchema
-  "The state of a faction at a given time."
-  {(s/required-key :id)         s/Int
-   (s/required-key :state-id)   s/Int
-   (s/required-key :state)      s/Str
-   (s/required-key :updated-at) s/Int})
+   (s/required-key :is-player-faction) s/Bool
+   (s/required-key :state-id)          s/Int
+   (s/required-key :state)             s/Str})
 
 (def SystemFactionSchema
   "A schema for the list of factions in a system."
