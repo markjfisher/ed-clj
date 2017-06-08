@@ -70,33 +70,15 @@
 
   (info "create-db-tables: all db tables created"))
 
-;; extend this function to check the current schema version and apply
-;; additions over the top. initially it's empty because there isn't an update
-(defn run-db-updates!
-  "applies any updates to database based on current schema version"
-  []
-  (info "run-db-updates!"))
-
 (defn init-db!
   "Initialises a database if needed"
   []
   (info "init-db!")
-  (try
-    (if (faction-table-exists)
-      (do
-        (info "ED Faction - Database found. Checking for updates")
-        (run-db-updates!))
-      (do
-        (info "ED Faction - creating initial table structure")
-        (create-db-tables!)
-        (run-db-updates!)))))
-
-(defn drop-tables!
-  "Checks for existing tables and drops them."
-  []
-  (info "drop-tables!")
-  (try
-    (when (faction-table-exists)
-      (do
-        (info "Dropping tables")
-        (drop-db-tables!)))))
+  (when (and (:recreate-db config)
+             (faction-table-exists))
+    (do (info "Dropping tables")
+        (drop-db-tables!)))
+  (when-not (faction-table-exists)
+    (do
+      (info "ED Faction - creating initial table structure")
+      (create-db-tables!))))

@@ -14,6 +14,13 @@
                               :updated-at (:updated-at faction-all))
                     f-data (s/validate s/FactionSchema f-no-state)
                     fs-data (s/validate s/FactionStateSchema f-state)]
-               [f-data fs-data]
+               {:faction f-data :faction-state fs-data}
                (fail (format "Failed to parse faction data %s:\n%s" l (:message err)))))
 
+(defn validate-system
+  "Given a json string for the system, validate it and return a map of the data."
+  [l]
+  (attempt-all err [system-all (jc/parse-string l u/name-to-keyword)
+                    system (s/validate s/SystemDataSchema system-all)]
+               {:system system}
+               (fail (format "Failed to parse system data %s:\n%s" l (:message err)))))

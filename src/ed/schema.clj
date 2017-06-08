@@ -31,6 +31,7 @@
 (def SystemDataSchema
   "A schema for Systems."
   {(s/required-key :id)                           s/Int
+   (s/required-key :updated-at)                   s/Int
    (s/required-key :edsm-id)                      s/Int
    (s/required-key :name)                         s/Str
    (s/required-key :x)                            s/Num
@@ -52,7 +53,6 @@
    (s/required-key :power-state)                  s/Str
    (s/required-key :power-state-id)               s/Int
    (s/required-key :needs-permit)                 s/Bool
-   (s/required-key :updated-at)                   s/Int
    (s/required-key :simbad-ref)                   s/Str
    (s/required-key :controlling-minor-faction-id) s/Int
    (s/required-key :controlling-minor-faction)    s/Str

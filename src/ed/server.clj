@@ -3,7 +3,8 @@
             [ed.db :as d]
             [mount.core :as mount :refer [defstate]]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]
-            [taoensso.timbre :as timbre :refer [info infof]])
+            [taoensso.timbre :as timbre :refer [info infof report reportf]])
+  (:import (java.util TimeZone))
   (:gen-class))
 
 
@@ -18,7 +19,7 @@
           :start (let [nrepl-config (:nrepl config)
                        nrepl-port (or (:port nrepl-config) 0)]
                    (when (> nrepl-port 0)
-                     (infof "Starting nrepl service on port %d" (:port nrepl-config))
+                     (reportf "Starting nrepl service on port %d" (:port nrepl-config))
                      (start-nrepl nrepl-config)))
           :stop (let [nrepl-config (:nrepl config)
                       nrepl-port (or (:port nrepl-config) 0)]
@@ -29,16 +30,18 @@
 ;; or directly "lein run -m ed.server"
 (defn -main
   ([]
+    ;; get the config values only so we can set logging level
+    ;; and stop the d/b pool from being too verbose.
+   (mount/start #'ed.conf/config)
+   (timbre/merge-config! (:timbre config))
+
+    ;; this loads all other state, including the pool, but logging will be honoured
    (mount/start)
-   (let [timbre-config (:timbre config)]
-     (timbre/merge-config! timbre-config)
-     (infof "timbre-config: %s" timbre-config))
 
    (info "starting main")
-   (d/drop-tables!)
    (d/init-db!)
 
-   (info "... -main complete"))
+   (report "-main complete."))
   ([_]
     ;; just stops IDE from showing unused main
    (-main)))

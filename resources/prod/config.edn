@@ -1,4 +1,6 @@
-{:db
+{:recreate-db false
+
+ :db
  {:auto-commit        true
   :read-only          false
   :connection-timeout 30000
@@ -17,11 +19,20 @@
   :register-mbeans    false}
 
  :timbre
- {:level :error}
+ {:level :error
+  :ns-blacklist  ["com.zaxxer.hikari.*"]
+  :timestamp-opts {:timezone :jvm-default}}
 
  :nrepl
  {:host "0.0.0.0"
   :port 7878}
 
  :eddb
- {:url "tcp://eddn-relay.elite-markets.net:9500"}}
+ {:url "tcp://eddn-relay.elite-markets.net:9500"}
+
+ :ed-systems
+ [{:name "Exioce" :distance 30.0}
+  {:name "Apathaam" :distance 30.0}
+  {:name "Azrael" :distance 30.0}
+  {:name "Cardea" :distance 30.0}
+  {:name "Njiri" :distance 30.0}]}
