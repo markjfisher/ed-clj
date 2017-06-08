@@ -16,6 +16,8 @@
                  ;; 0MQ for getting EDDB messages
                  [org.zeromq/jeromq "0.4.0"]
                  [org.zeromq/cljzmq "0.1.4" :exclusions [org.zeromq/jzmq]]
+
+                 ;; json reading
                  [cheshire "5.7.1"]
 
                  ;; DB management

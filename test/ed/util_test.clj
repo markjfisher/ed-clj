@@ -39,3 +39,35 @@
   (testing "missing resource returns appropriate fail"
     (is (.startsWith (:message (u/load-config "missing-file.edn")) "failed to load config(s) (\"missing-file.edn\"):"))))
 
+(deftest name-to-keyword-test
+  (testing "string names are converted to keywords with hyphens for underscores"
+    (is (= :foo-bar (u/name-to-keyword "foo_bar")))
+    (is (= :Foo-Bar (u/name-to-keyword "Foo_Bar")))
+    (is (= :foo-bar (u/name-to-keyword "foo-bar")))
+    (is (= :foobar (u/name-to-keyword "foobar")))))
+
+(deftest distance-tests
+  (let [o  {:x 0 :y 0 :z 0}
+        p1 {:x 1.0 :y 0 :z 0}
+        p2 {:x 0 :y 1.0 :z 0}
+        p3 {:x 0 :y 0 :z 1.0}]
+    (testing "distance between two points"
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between o p1)))))
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between p1 o)))))
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between o p2)))))
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between p2 o)))))
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between o p3)))))
+      (is (> 0.0001 (Math/abs (- 1.0 (u/distance-between p3 o)))))
+
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p1 p2)))))
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p2 p1)))))
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p1 p3)))))
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p3 p1)))))
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p2 p3)))))
+      (is (> 0.0001 (Math/abs (- 1.414214 (u/distance-between p3 p2))))))
+
+    (testing "distance within predicate"
+      (is (true? (u/distance-within? o p1 1.1)))
+      (is (false? (u/distance-within? o p1 0.9)))
+      (is (true? (u/distance-within? p1 p2 1.5)))
+      (is (false? (u/distance-within? p2 p1 1.4))))))

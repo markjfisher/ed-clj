@@ -2,7 +2,8 @@
   (:require [ed.errors :refer [attempt-all fail]]
             [clojure.edn :as edn]
             [clojure.pprint :as pprint]
-            [clojure.set :refer [difference]]))
+            [clojure.set :refer [difference]]
+            [clojure.string :as str]))
 
 (defn deep-merge
   "Deep merge two maps"
@@ -34,3 +35,20 @@
        (catch Exception err
          (fail (format "failed to load config(s) %s: %s" filenames err)))))
 
+(defn name-to-keyword
+  [k]
+  "Convert names with underscores to hyphens and return as a keyword"
+  (keyword (str/replace k "_" "-")))
+
+(defn distance-between
+  "Calculate the distance between two points p1, p2 which are maps with :x :y :z coordinates."
+  [p1 p2]
+  (Math/pow (+ (Math/pow (- (:x p1) (:x p2)) 2)
+               (Math/pow (- (:y p1) (:y p2)) 2)
+               (Math/pow (- (:z p1) (:z p2)) 2))
+            0.5))
+
+(defn distance-within?
+  "Predicate for two points being within a distance of each other"
+  [p1 p2 d]
+  (> d (distance-between p1 p2)))
