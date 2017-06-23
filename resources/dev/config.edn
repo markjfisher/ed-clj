@@ -1,6 +1,4 @@
-{:recreate-db true
-
- :db
+{:db
  {:auto-commit        true
   :read-only          false
   :connection-timeout 30000
@@ -19,8 +17,8 @@
   :register-mbeans    false}
 
  :timbre
- {:level :info
-  :ns-blacklist  ["com.zaxxer.hikari.*"]
+ {:level          :info
+  :ns-blacklist   ["com.zaxxer.hikari.*"]
   :timestamp-opts {:timezone :jvm-default}}
 
  :nrepl
@@ -28,11 +26,19 @@
   :port 0}
 
  :eddb
- {:url "tcp://eddn-relay.elite-markets.net:9500"}
+ {:update-url        "tcp://eddn-relay.elite-markets.net:9500"
 
- :ed-systems
- [{:name "Exioce" :distance 30.0}
-  {:name "Apathaam" :distance 30.0}
-  {:name "Azrael" :distance 30.0}
-  {:name "Cardea" :distance 30.0}
-  {:name "Njiri" :distance 30.0}]}
+  :Xfactions          "./downloads/factions.jsonl"
+  :factions          "./downloads/factions.1.jsonl"
+  :Xsystems-populated "./downloads/systems_populated.jsonl"
+  :systems-populated "./downloads/systems_populated.1.jsonl"
+  ;; just keep them for reference
+  :live-factions          "https://eddb.io/archive/v5/factions.jsonl"
+  :live-systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"}
+
+ :app
+ {:new-db true
+  :faction-actor-count 10
+  :system-actor-count 10}
+
+ }

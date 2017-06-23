@@ -1,4 +1,5 @@
 (ns dev
+  (:gen-class)
   (:require [mount.core :as mount]
             [clojure.pprint :refer [pprint]]
             [clojure.tools.namespace.repl :as tn]
@@ -14,6 +15,7 @@
             [ed.schema]
             [ed.util]
             [ed.zip]
+            [ed.loaders]
             [ed.zmq]
             ))
 

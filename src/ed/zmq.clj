@@ -1,4 +1,5 @@
 (ns ed.zmq
+  (:gen-class)
   (:require [zeromq.zmq :as zmq]
             [ed.zip :as z]
             [cheshire.core :as jc]

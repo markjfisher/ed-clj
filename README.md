@@ -1,6 +1,17 @@
 # ed-clj
 
-A Clojure library for Elite Dangerous Tools
+A Clojure library for Elite Dangerous Tools:
+
+1. Factions to InfluxDB
+2. DiscordBot
+
+## DESIGN
+
+Nightly data and updates will be applied to a local d/b to hold
+the 'latest' value for each system and faction therein.
+
+Alterations will be sent to influxDB to handle time.
+
 
 ## DEV WALKTHROUGH
 
@@ -34,8 +45,13 @@ To run the application from the command line:
 
 Currently this will drop all tables and recreate them in a pgsql
 database named 'ed-factions', with user 'ed'.
+This is controlled with {:new-db true} config value.
 See the config.edn files for d/b etc config.
 
+    $ lein goprod
+
+This will run ed.server with prod profile, which by default does
+not reinitialise the database ({:new-db false} in config.edn).
 
 ## DONE
 
@@ -44,11 +60,11 @@ See the config.edn files for d/b etc config.
 
 ## TODO
 
-1. Import all factions: populate 'factions' (key: faction_id, updated_at)
-2. Import all systems_populated, populate 'system' (key: system_id, updated_at), 'system_faction' (key: system_id, faction_id, updated_at)
-3. Process FSDJump events and update 'system_faction'
+- Import all factions: populate 'factions' (key: faction_id)
+- Import all systems_populated, populate 'system' (key: system_id, updated_at), 'system_faction' (key: system_id, faction_id)
+- Process FSDJump events and update 'system_faction'
 
-How does time affect the data? Add 'updated_at' field to PK
+How does time affect the data? It doesn't. Time is handled by influxDB.
 
 ## Notes on data
 
@@ -327,6 +343,37 @@ How does time affect the data? Add 'updated_at' field to PK
     "Low":16
     "Medium":32
     null
+
+# ACTOR MODEL NOTES
+
+## EVERYTHING IS AN ACTOR
+
+If we are modelling using everything is an actor, we could spawn named actors for each system/faction,
+(but this would generate 75k faction actors, and 20k system actors).
+
+Each would hold a small amount of state for itself, systems would hold the faction list and other data,
+factions would hold their systems they are active in, and influence value therein.
+They could hold their influence history.
+
+Each actor would send a message to a persistance actor for its type, which would check if there's a
+d/b entry needed to update based on last updated time, and only write if it's newer.
+
+There would be actors for:
+ - reading (nightly) system jsonl, sending appropriate message to named system actor,
+ - similar for the nightly faction jsonl
+ - update from edsm.net (FSDJump) send change to system and faction actors.
+
+This would give us chance to write massively concurrent simulations of influence changes.
+Factions could become 'aware' of other factions in their neighbourhoods.
+
+## PROCESSING ACTORS
+
+Actor for processing the system/faction jsonl entries to update the d/b, we just push lots of messages
+onto the actor to process per line read.
+Update actor would send messages to same actors to update.
+
+This is a much simpler and smaller model.
+
 
 ## License
 

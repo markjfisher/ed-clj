@@ -1,6 +1,7 @@
 (ns ed.db
+  (:gen-class)
   (:require [ed.conf :refer [config]]
-            [taoensso.timbre :as timbre :refer [info errorf]]
+            [taoensso.timbre :as timbre :refer [info errorf infof]]
             [conman.core :as conman]
             [mount.core :refer [defstate]]))
 
@@ -23,23 +24,23 @@
 (defn drop-db-tables!
   "Drops all database tables"
   []
-  (info "drop-db-tables!")
-  (drop-faction-table!)
-  (drop-government-table!)
-  (drop-allegiance-table!)
-  (drop-state-table!)
-  (drop-reserve-type-table!)
-  (drop-primary-economy-table!)
-  (drop-power-state-table!)
-  (drop-security-table!)
-  (drop-faction-state-table!)
-  (drop-system-table!)
-  (drop-system-faction-table!))
+  (let [drop-fns []])
+  (dorun (for [drop-fn [drop-faction-table!
+                        drop-government-table!
+                        drop-allegiance-table!
+                        drop-state-table!
+                        drop-reserve-type-table!
+                        drop-primary-economy-table!
+                        drop-power-state-table!
+                        drop-security-table!
+                        drop-system-table!
+                        drop-system-faction-table!]]
+           (try (drop-fn)
+                (catch Exception e (infof "Could not drop table: %s" (.getMessage e)))))))
 
 (defn create-db-tables!
   "Initialises an empty database"
   []
-  (info "create-db-tables!")
   (create-faction-table!)
   (create-government-table!)
   (create-allegiance-table!)
@@ -48,7 +49,6 @@
   (create-primary-economy-table!)
   (create-power-state-table!)
   (create-secuirty-table!)
-  (create-faction-state-table!)
   (create-system-table!)
   (create-system-faction-table!)
 
@@ -62,8 +62,6 @@
   (create-primary-economy-pk!)
   (create-power-state-pk!)
   (create-security-pk!)
-  (create-faction-state-pk!)
-  (create-faction-state-faction-id-index!)
   (create-system-pk!)
   (create-system-name-index!)
   (create-system-faction-pk!)
@@ -74,8 +72,7 @@
   "Initialises a database if needed"
   []
   (info "init-db!")
-  (when (and (:recreate-db config)
-             (faction-table-exists))
+  (when (get-in config [:app :new-db] true)
     (do (info "Dropping tables")
         (drop-db-tables!)))
   (when-not (faction-table-exists)

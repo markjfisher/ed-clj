@@ -71,3 +71,33 @@
       (is (false? (u/distance-within? o p1 0.9)))
       (is (true? (u/distance-within? p1 p2 1.5)))
       (is (false? (u/distance-within? p2 p1 1.4))))))
+
+(deftest rotate-tests
+  (testing "rotating lists"
+    (is (= '(1 2 3) (u/rotate 0 '(1 2 3))))
+    (is (= '(2 3 1) (u/rotate 1 '(1 2 3))))
+    (is (= '(3 1 2) (u/rotate 2 '(1 2 3))))
+    (is (= '(1 2 3) (u/rotate 3 '(1 2 3))))
+    (is (= '(3 1 2) (u/rotate -1 '(1 2 3))))
+    (is (= '(2 3 1) (u/rotate -2 '(1 2 3))))
+    (is (= '(1 2 3) (u/rotate -3 '(1 2 3))))
+    (is (= '(3 1 2) (u/rotate -4 '(1 2 3)))))
+
+  (testing "rotating vectors"
+    (is (= [1 2 3] (u/rotate 0 [1 2 3])))
+    (is (= [2 3 1] (u/rotate 1 [1 2 3])))
+    (is (= [3 1 2] (u/rotate 2 [1 2 3])))
+    (is (= [1 2 3] (u/rotate 3 [1 2 3])))
+    (is (= [3 1 2] (u/rotate -1 [1 2 3])))
+    (is (= [2 3 1] (u/rotate -2 [1 2 3])))
+    (is (= [1 2 3] (u/rotate -3 [1 2 3])))
+    (is (= [3 1 2] (u/rotate -4 [1 2 3]))))
+
+  (testing "rotating non sequences or empty collections"
+    (is (nil? (u/rotate 0 nil)))
+    (is (nil? (u/rotate 0 [])))
+    (is (nil? (u/rotate 0 '())))
+    (is (nil? (u/rotate 1 nil)))
+    (is (nil? (u/rotate 1 '())))
+    (is (nil? (u/rotate 1 5)))
+    (is (nil? (u/rotate 1 :foo)))))

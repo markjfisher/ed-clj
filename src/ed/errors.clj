@@ -1,4 +1,5 @@
 (ns ed.errors
+  (:gen-class)
   (:require [clojure.algo.monads :refer [maybe-m domonad m-result m-bind defmonad]]))
 
 ;; see https://brehaut.net/blog/2011/error_monads

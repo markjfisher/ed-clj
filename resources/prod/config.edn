@@ -1,6 +1,4 @@
-{:recreate-db false
-
- :db
+{:db
  {:auto-commit        true
   :read-only          false
   :connection-timeout 30000
@@ -19,8 +17,8 @@
   :register-mbeans    false}
 
  :timbre
- {:level :error
-  :ns-blacklist  ["com.zaxxer.hikari.*"]
+ {:level          :error
+  :ns-blacklist   ["com.zaxxer.hikari.*"]
   :timestamp-opts {:timezone :jvm-default}}
 
  :nrepl
@@ -28,11 +26,11 @@
   :port 7878}
 
  :eddb
- {:url "tcp://eddn-relay.elite-markets.net:9500"}
+ {:update-url        "tcp://eddn-relay.elite-markets.net:9500"
+  :factions          "https://eddb.io/archive/v5/factions.jsonl"
+  :systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"}
 
- :ed-systems
- [{:name "Exioce" :distance 30.0}
-  {:name "Apathaam" :distance 30.0}
-  {:name "Azrael" :distance 30.0}
-  {:name "Cardea" :distance 30.0}
-  {:name "Njiri" :distance 30.0}]}
+ :app
+ {:new-db false}
+
+ }

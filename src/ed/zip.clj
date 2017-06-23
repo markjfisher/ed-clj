@@ -1,4 +1,5 @@
 (ns ed.zip
+  (:gen-class)
   (:import (java.util.zip InflaterInputStream DeflaterInputStream ZipException Inflater)
            (org.apache.commons.io IOUtils)
            (java.io InputStream BufferedInputStream ByteArrayInputStream)))
