@@ -26,13 +26,6 @@
   []
   (let [drop-fns []])
   (dorun (for [drop-fn [drop-faction-table!
-                        drop-government-table!
-                        drop-allegiance-table!
-                        drop-state-table!
-                        drop-reserve-type-table!
-                        drop-primary-economy-table!
-                        drop-power-state-table!
-                        drop-security-table!
                         drop-system-table!
                         drop-system-faction-table!]]
            (try (drop-fn)
@@ -42,26 +35,12 @@
   "Initialises an empty database"
   []
   (create-faction-table!)
-  (create-government-table!)
-  (create-allegiance-table!)
-  (create-state-table!)
-  (create-reserve-type-table!)
-  (create-primary-economy-table!)
-  (create-power-state-table!)
-  (create-secuirty-table!)
   (create-system-table!)
   (create-system-faction-table!)
 
   ;; constraints
   (create-faction-pk!)
   (create-faction-name-index!)
-  (create-government-pk!)
-  (create-allegiance-pk!)
-  (create-state-pk!)
-  (create-reserve-type-pk!)
-  (create-primary-economy-pk!)
-  (create-power-state-pk!)
-  (create-security-pk!)
   (create-system-pk!)
   (create-system-name-index!)
   (create-system-faction-pk!)
