@@ -255,8 +255,8 @@ How does time affect the data? It doesn't. Time is handled by influxDB.
 
     "Boom":16
     "Bust":32
-    "Civil Unrest":48
-    "Civil War":64
+    "Civil Unrest":48 // CivilUnrest in FSDJump
+    "Civil War":64 // CivilWar in FSDJump
     "Election":65
     "Expansion":67
     "Famine":37
@@ -374,6 +374,36 @@ Update actor would send messages to same actors to update.
 
 This is a much simpler and smaller model.
 
+## Duplicate System names
+
+    Arti                           |     2
+    Almar                          |     2
+
+So when finding the system by its name in a journal event, there could be multiple.
+We can find the closest to the matching name:
+
+    Hoff | -9.9375 | -69.2188 | -72.9375
+
+      "StarPos":[
+         -9.938,
+         -69.219,
+         -72.938
+      ],
+
+    (u/distance-between
+      {:x -9.9375 :y -69.2188 :z -72.9375}
+      {:x -9.938  :y -69.219  :z -72.938})
+    => 7.348469228349329E-4
+    == 0.0007348
+    < 0.1
+
+In the case of Arti/Almar they are sufficiently far apart from each other to make
+this test.
+
+Because of the small difference here, we are going to ignore Jump events trying to 'reposition' stars due to
+lack of precision.
+It is simply good enough to get a distance between the stored version and the incoming version and say it is
+within a level as shown.
 
 ## License
 

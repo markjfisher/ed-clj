@@ -5,7 +5,10 @@
             [clojure.pprint :as pprint]
             [clojure.set :refer [difference]]
             [clojure.string :as str]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clj-time.coerce :as coerce]
+            [clj-time.format :as format]
+            [clj-time.core :as c])
   (:import (java.io File)))
 
 (defn deep-merge
@@ -80,3 +83,13 @@
     (copy-url-to! url temp-file)
     (.deleteOnExit temp-file)
     temp-file))
+
+(defn timestamp-to-int
+  "Creates an int value from formatted timestamp relative to epoch in seconds"
+  [t]
+  (coerce/to-epoch (format/parse (format/formatters :date-time-no-ms) t)))
+
+(defn now-as-int
+  "Creates an int value for now relative to epoch in seconds"
+  []
+  (coerce/to-epoch (c/now)))

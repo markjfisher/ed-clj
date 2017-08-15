@@ -48,4 +48,5 @@
   :resource-paths ["sql" "resources"]
 
   :aliases {"godev" ["with-profile" "dev," "run" "-m" "ed.server"]
-            "goprod" ["with-profile" "prod," "run" "-m" "ed.server"]})
+            "goprod" ["with-profile" "prod," "run" "-m" "ed.server"]
+            "gozmq" ["with-profile" "prod," "run" "-m" "ed.zmq"]})

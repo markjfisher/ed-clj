@@ -58,6 +58,28 @@
    (s/required-key :reserve-type)                 (s/maybe s/Str)
    (s/required-key :minor-faction-presences)      (s/maybe [SystemFactionSchema])})
 
+(def JournalFSDJumpFactionEntrySchema
+  "A schema for the faction entry of a FSDJump journal event"
+  {(s/required-key :Allegiance)   s/Str
+   (s/required-key :FactionState) s/Str
+   (s/required-key :Influence)    s/Num
+   (s/required-key :Name)         s/Str
+   (s/required-key :Government)   s/Str})
+
+(def JournalFSDJumpSchema
+  "A schema for the FSDJump journal event"
+  {(s/required-key :StarSystem)       s/Str
+   (s/optional-key :FactionState)     s/Str
+   (s/optional-key :SystemFaction)    s/Str
+   (s/required-key :timestamp)        s/Str
+   (s/required-key :SystemSecurity)   s/Str
+   (s/required-key :SystemAllegiance) s/Str
+   (s/required-key :SystemEconomy)    s/Str
+   (s/required-key :StarPos)          [s/Num]
+   (s/optional-key :Factions)         [JournalFSDJumpFactionEntrySchema]
+   (s/required-key :event)            s/Str
+   (s/required-key :SystemGovernment) s/Str})
+
 (defn validate
   "Wrap schema's validate so we can return a fail instead of exception."
   [t i]
@@ -81,3 +103,11 @@
                     f-data (validate FactionSchema faction-all)]
                f-data
                (fail (format "Failed to parse faction data %s:\n%s" l (:message err)))))
+
+(defn validate-journal-fsd-jump
+  "Validate fsd-jump journal event"
+  [l]
+  (attempt-all err [jump-all (jc/parse-string l u/name-to-keyword)
+                    j-data (validate JournalFSDJumpSchema jump-all)]
+               j-data
+               (fail (format "Failed to parse fsd-jump data %s:\n%s" l (:message err)))))

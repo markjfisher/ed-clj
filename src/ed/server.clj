@@ -2,6 +2,7 @@
   (:require [ed.conf :refer [config]]
             [ed.pulsar-faction :as pf]
             [ed.pulsar-system :as ps]
+            [ed.pulsar-journal-events :as pj]
             [ed.db :as d]
             [ed.loaders :as l]
             [mount.core :as mc]
@@ -43,12 +44,14 @@
    (mc/start)
 
    (info "starting main")
-   (let [fac (get-in config [:app :faction-actor-count] 50)
-         sac (get-in config [:app :system-actor-count] 50)
+   (let [fac (get-in config [:app :faction-actor-count] 20)
+         sac (get-in config [:app :system-actor-count] 20)
+         jac (get-in config [:app :journal-actor-count] 20)
          fh (pf/start-faction-handler fac)
          sh (ps/start-system-handler sac)]
      (d/init-db!)
      (l/load-data!)
+     (pj/start-journal-handlers jac)
      (report "-main complete. joining actors to cause pause...")
      (join fh)
      (report "... joined never prints!")))

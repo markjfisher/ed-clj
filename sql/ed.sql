@@ -66,14 +66,19 @@ CREATE TABLE system_faction (
   system_id        INT  NOT NULL,
   minor_faction_id INT  NOT NULL,
   updated_at       INT  NOT NULL,
-  state_id         INT  NOT NULL,
-  influence        REAL NOT NULL
+  state_id         INT,
+  influence        REAL
 );
 
 -- :name create-system-faction-pk! :!
 -- :doc create the system_faction primary key
 CREATE UNIQUE INDEX system_faction_pk
   ON system_faction (system_id, minor_faction_id);
+
+-- :name create-system-faction-system-index! :!
+-- :doc create index on system_faction for searching against system
+CREATE INDEX system_faction_system_idx
+  ON system_faction (system_id);
 
 ---------------------------------------------------------------------
 
@@ -109,8 +114,8 @@ SELECT *
 FROM system
 WHERE id = :id;
 
--- :name get-system-by-name :? :1
--- :doc get system record by name
+-- :name get-system-by-name :? :*
+-- :doc get system record by name. returns a list as names are not unique.
 SELECT *
 FROM system
 WHERE name = :name;
@@ -166,3 +171,55 @@ SET
   controlling_minor_faction_id = :controlling-minor-faction-id,
   reserve_type_id = :reserve-type-id
 WHERE id = :id;
+
+-- name update-system-from-fsdjump! :! :n
+-- :doc updates a system record from subset of data in fsd-jump
+UPDATE system
+SET
+  state_id = :state-id,
+  allegiance_id = :allegiance-id,
+  updated_at = :updated-at,
+  system_faction = :system-faction-id
+WHERE id = :id;
+
+---------------------------------------------------------------------
+
+-- :name get-system-faction :? :*
+-- :doc selects the faction information in a given system. returns multiple rows.
+
+SELECT *
+FROM system_faction
+WHERE system_id = :system-id;
+
+-- :name delete-system-faction-by-system-id! :! :n
+-- :doc delete all system-faction information for a particular system-id
+-- All data is cleared from system_faction table by system_id so that any expansions/removals
+-- of factions from a system do not get left around. We are only keeping the most current
+-- values. If historical data is required, that is for consumers to arrange (e.g. InfluxDB)
+
+DELETE FROM system_faction
+WHERE system_id = :system-id;
+
+-- :name insert-system-faction! :! :n
+-- :doc inserts system-faction data
+
+INSERT INTO system_faction (system_id, minor_faction_id, updated_at, state_id, influence)
+VALUES (:system-id, :minor-faction-id, :updated-at, :state-id, :influence);
+
+-- :name update-system-faction! :! :n
+-- :doc updates the system-faction table for the given system-id
+
+UPDATE system_faction
+SET
+  updated_at = :updated-at,
+  state_id = :state-id,
+  influence = :influence
+WHERE system_id = :system-id
+AND minor_faction_id = :minor-faction-id;
+
+-- :name get-num-system-faction :? :1
+-- :doc gets the count of the factions for a particular system-id
+
+SELECT COUNT(*)
+FROM system_faction
+WHERE system_id = :system-id;

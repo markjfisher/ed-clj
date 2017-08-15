@@ -6,7 +6,7 @@
   :idle-timeout       600000
   :max-lifetime       1800000
   :minimum-idle       3
-  :maximum-pool-size  10
+  :maximum-pool-size  20
   :pool-name          "db-pool"
   :adapter            "postgresql"
   :username           "ed"
@@ -28,9 +28,12 @@
  :eddb
  {:update-url        "tcp://eddn-relay.elite-markets.net:9500"
   :factions          "https://eddb.io/archive/v5/factions.jsonl"
-  :systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"}
+  :systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"
+  :journal-schema    "http://schemas.elite-markets.net/eddn/journal/1"}
 
  :app
- {:new-db false}
+ {:new-db              false
+  :faction-actor-count 10
+  :system-actor-count  10}
 
  }

@@ -26,19 +26,21 @@
   :port 0}
 
  :eddb
- {:update-url        "tcp://eddn-relay.elite-markets.net:9500"
+ {:update-url             "tcp://eddn-relay.elite-markets.net:9500"
 
-  :Xfactions          "./downloads/factions.jsonl"
-  :factions          "./downloads/factions.1.jsonl"
-  :Xsystems-populated "./downloads/systems_populated.jsonl"
-  :systems-populated "./downloads/systems_populated.1.jsonl"
+  :Xfactions              "./downloads/factions.jsonl"
+  :factions               "./downloads/factions.1.jsonl"
+  :systems-populated     "./downloads/systems_populated.jsonl"
+  ;; :systems-populated      "https://eddb.io/archive/v5/systems_populated.jsonl"
   ;; just keep them for reference
   :live-factions          "https://eddb.io/archive/v5/factions.jsonl"
-  :live-systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"}
+  :live-systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"
+
+  :journal-schema         "http://schemas.elite-markets.net/eddn/journal/1"}
 
  :app
- {:new-db true
+ {:new-db              true
   :faction-actor-count 10
-  :system-actor-count 10}
+  :system-actor-count  10}
 
  }

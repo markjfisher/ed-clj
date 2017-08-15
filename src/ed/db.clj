@@ -44,6 +44,7 @@
   (create-system-pk!)
   (create-system-name-index!)
   (create-system-faction-pk!)
+  (create-system-faction-system-index!)
 
   (info "create-db-tables: all db tables created"))
 

@@ -22,6 +22,11 @@
 ;; They are only needed to lookup string values back to ids to store against system/faction.
 ;; We can scan the file twice. Once to load the sub-data, 2nd to load the system and faction information.
 
+(defn lookup
+  "Find the ID for the given type and matching key."
+  [type key]
+  (get-in @lookup-data [type key]))
+
 (defn show-lookup-data-error
   [type k-str v-id old-value]
   (errorf "error in lookup data: type: %s, string key: %s, new value: %d, old value: %d" type k-str v-id old-value))

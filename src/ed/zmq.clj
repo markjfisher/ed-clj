@@ -41,18 +41,21 @@
 (defmethod process-event :default
   [data])
 
-(defn -main []
-  (let [context (zmq/zcontext)
-        poller (zmq/poller context 2)]
-    (with-open [subscriber (doto (zmq/socket context :sub)
-                             (zmq/connect "tcp://eddn-relay.elite-markets.net:9500")
-                             (zmq/subscribe ""))]
-      (zmq/register poller subscriber :pollin)
-      (while (not (.. Thread currentThread isInterrupted))
-        (zmq/poll poller)
-        (when (zmq/check-poller poller 0 :pollin)
-          (let [msg-raw (zmq/receive subscriber)
-                msg     (slurp (z/inflate msg-raw))
-                edn     (jc/parse-string msg true)]
-            ;; (pp/pprint edn)
-            (process-event edn)))))))
+(defn -main
+  ([]
+   (let [context (zmq/zcontext)
+         poller (zmq/poller context 2)]
+     (with-open [subscriber (doto (zmq/socket context :sub)
+                              (zmq/connect "tcp://eddn-relay.elite-markets.net:9500")
+                              (zmq/subscribe ""))]
+       (zmq/register poller subscriber :pollin)
+       (while (not (.. Thread currentThread isInterrupted))
+         (zmq/poll poller)
+         (when (zmq/check-poller poller 0 :pollin)
+           (let [msg-raw (zmq/receive subscriber)
+                 msg (slurp (z/inflate msg-raw))
+                 edn (jc/parse-string msg true)]
+             ;; (pp/pprint edn)
+             (process-event edn)))))))
+  ([_]
+    (-main)))

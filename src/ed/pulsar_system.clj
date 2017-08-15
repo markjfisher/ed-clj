@@ -1,3 +1,6 @@
+;; this class handles system data from nightly eddb dumps
+;; by spawning actors to process jsonl lines as they are read
+
 (ns ed.pulsar-system
   (:gen-class)
   (:require [ed.db :as d]
@@ -7,9 +10,10 @@
             [cheshire.core :as jc]
             [co.paralleluniverse.pulsar.actors :refer [! !! actor receive register! spawn whereis]]
             [co.paralleluniverse.pulsar.core :refer [defsfn join]]
-            [taoensso.timbre :as timbre :refer [info error infof errorf]]))
+            [taoensso.timbre :as timbre :refer [info error infof errorf]]
+            [clojure.string :as str]))
 
-(defn create-system-map
+(defsfn create-system-map
   [m]
   (select-keys m
                [:id :updated-at :edsm-id :name :x :y :z :population
@@ -18,33 +22,94 @@
                 :needs-permit :simbad-ref :controlling-minor-faction-id
                 :reserve-type-id]))
 
+(defsfn create-system-faction-map
+  [m]
+  (select-keys m [:system-id :updated-at :minor-faction-id :state-id :influence]))
+
+(defsfn faction-data-changed?
+  "Returns true if any faction information between the two maps have changed.
+  The data is in the format:
+  current: {             :minor-faction-id 1               :state-id 0 :influence 10.0 :state \"Civil War\"}
+  new    : {:system_id 1 :minon_faction_id 1 :updated_at 1 :state_id 0 :influence 10.0}
+  Thus, for each minor-faction-id and compare state-id and influence.
+  Algorithm: create new maps of current and new just holding the values to compare with normalised names and compare."
+  [current new]
+  (let [mc1 (select-keys current [:minor-faction-id :state-id :influence])
+        mn1 (select-keys new [:minor_faction_id :state_id :influence])
+        mn2 (into {} (for [[k v] mn1] [(-> k name (str/replace "_" "-") keyword) v]))]
+    (not= mc1 mn2)))
+
+(defsfn find-entry-in-maps
+  "Find the first map with k/v pair in a list of maps ms"
+  [ms k v]
+  (first (reduce #(if (= v (get %2 k))
+                    (conj %1 %2)
+                    %1)
+                 []
+                 ms)))
+
+(defsfn any-faction-data-changed?
+  "Returns true if any faction information between the two list of maps have changed.
+  The parameters are a list of maps, of form:
+  current: [{             :minor-faction-id 1               :state-id 0 :influence 10.0 :state \"Civil War\"}, ...]
+  new    : [{:system_id 1 :minon_faction_id 1 :updated_at 1 :state_id 0 :influence 10.0}, ...].
+  Here, we check the map sizes are equal, then test each matching map based on minor-faction-id"
+  [current new]
+  (if (= (count current) (count new))
+    (let [c-minor-ids (map :minor-faction-id current)
+          n-minor-ids (map :minor_faction_id new)
+          diff-ids (not= (sort c-minor-ids) (sort n-minor-ids))
+          change-seq (for [id c-minor-ids]
+                       (let [c-faction (find-entry-in-maps current :minor-faction-id id)
+                             n-faction (find-entry-in-maps new :minor_faction_id id)]
+                         (faction-data-changed? c-faction n-faction)))]
+      (or diff-ids (some true? change-seq) false))
+    true))
+
+(defsfn change-system!
+  "Updates or Inserts the system and system faction data based on type of :insert or :update"
+  [sys-data fac-data type]
+  (let [fns {:update {:system d/update-system! :system-faction d/update-system-faction!}
+             :insert {:system d/insert-system! :system-faction d/insert-system-faction!}}
+        sys-fn (get-in fns [type :system])
+        fac-fn (get-in fns [type :system-faction])]
+    (sys-fn (create-system-map sys-data))
+    (dorun (for [f fac-data]
+             (fac-fn (create-system-faction-map
+                     (merge f {:system-id (:id sys-data)
+                               :updated-at (:updated-at sys-data)})))))))
+
 (defsfn add-json-system
   [data]
-  (attempt-all err [system-data (s/validate-system data)
-                    old-system-row (d/get-system {:id (:id system-data)})]
-               (if (and (some? old-system-row)
-                        (> (:updated-at system-data) (:updated_at old-system-row))
-                        (or (not= (:edsm-id system-data) (:edsm_id old-system-row))
-                            (not= (:name system-data) (:name old-system-row))
-                            (not= (:x system-data) (:x old-system-row))
-                            (not= (:y system-data) (:y old-system-row))
-                            (not= (:z system-data) (:z old-system-row))
-                            (not= (:population system-data) (:population old-system-row))
-                            (not= (:is-populated system-data) (:is_populated old-system-row))
-                            (not= (:government-id system-data) (:government_id old-system-row))
-                            (not= (:allegiance-id system-data) (:allegiance_id old-system-row))
-                            (not= (:state-id system-data) (:state_id old-system-row))
-                            (not= (:security-id system-data) (:security_id old-system-row))
-                            (not= (:primary-economy-id system-data) (:primary_economy_id old-system-row))
-                            (not= (:power system-data) (:power old-system-row))
-                            (not= (:power-state-id system-data) (:power_state_id old-system-row))
-                            (not= (:needs-permit system-data) (:needs_permit old-system-row))
-                            (not= (:simbad-ref system-data) (:simbad_ref old-system-row))
-                            (not= (:controlling-minor-system-id system-data) (:controlling_minor_system_id old-system-row))
-                            (not= (:reserve-type-id system-data) (:reserve_type_id old-system-row))))
-                 (d/update-system! (create-system-map system-data))
-                 (when (nil? old-system-row)
-                   (d/insert-system! (create-system-map system-data))))
+  ;; TODO: ensure the updated-at is not after now, so we don't honour rogue future data
+  (attempt-all err [new-system-data (s/validate-system data)
+                    current-system-data (d/get-system {:id (:id new-system-data)})
+                    new-faction-data (:minor-faction-presences new-system-data)
+                    current-faction-data (d/get-system-faction {:system-id (:id new-system-data)})]
+               (if (and (some? current-system-data)
+                        (> (:updated-at new-system-data) (:updated_at current-system-data))
+                        (or (not= (:edsm-id new-system-data) (:edsm_id current-system-data))
+                            (not= (:name new-system-data) (:name current-system-data))
+                            (not= (:x new-system-data) (:x current-system-data))
+                            (not= (:y new-system-data) (:y current-system-data))
+                            (not= (:z new-system-data) (:z current-system-data))
+                            (not= (:population new-system-data) (:population current-system-data))
+                            (not= (:is-populated new-system-data) (:is_populated current-system-data))
+                            (not= (:government-id new-system-data) (:government_id current-system-data))
+                            (not= (:allegiance-id new-system-data) (:allegiance_id current-system-data))
+                            (not= (:state-id new-system-data) (:state_id current-system-data))
+                            (not= (:security-id new-system-data) (:security_id current-system-data))
+                            (not= (:primary-economy-id new-system-data) (:primary_economy_id current-system-data))
+                            (not= (:power new-system-data) (:power current-system-data))
+                            (not= (:power-state-id new-system-data) (:power_state_id current-system-data))
+                            (not= (:needs-permit new-system-data) (:needs_permit current-system-data))
+                            (not= (:simbad-ref new-system-data) (:simbad_ref current-system-data))
+                            (not= (:controlling-minor-faction-id new-system-data) (:controlling_minor_faction_id current-system-data))
+                            (not= (:reserve-type-id new-system-data) (:reserve_type_id current-system-data))
+                            (any-faction-data-changed? current-faction-data new-faction-data)))
+                 (change-system! new-system-data new-faction-data :update)
+                 (when (nil? current-system-data)
+                   (change-system! new-system-data new-faction-data :insert)))
                (errorf "Failed to load row from system data: %s\nError: %s" data (:message err))))
 
 (defsfn system-actor []
@@ -52,7 +117,7 @@
     (receive
       [m]
 
-      ;; validate and add the JSONL input and pass it on to :faction-update
+      ;; validate and add the JSONL input for system and its faction
       [:add-json-system data]
       (add-json-system data)
 
