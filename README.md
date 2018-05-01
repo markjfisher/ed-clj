@@ -23,7 +23,24 @@ Run the following to load all the 'state'
 
 You can now run d/b functions etc from ed.db namespace, e.g.
 
-    (ed.db/get-faction {:id 0})
+    (ed.db/get-faction {:id 18979})
+    => {:id 18979, :name "The Order of Mobius", :updated_at 1503711664, :government_id 80, :allegiance_id 4, :state_id 80, :home_system_id 1590, :is_player_faction true}
+
+    (ed.db/get-faction-by-name {:name "The Order of Mobius"})
+    => {:id 18979, :name "The Order of Mobius", :updated_at 1503711664, :government_id 80, :allegiance_id 4, :state_id 80, :home_system_id 1590, :is_player_faction true}
+
+    (ed.db/get-system-by-name {:name "Exioce"})
+    => ({:y -100.25, :power_state_id 32, :government_id 80, :allegiance_id 4, :controlling_minor_faction_id 18979, :needs_permit false, :name "Exioce", :reserve_type_id 4, :is_populated true, :updated_at 1503711664, :z 16.78125, :power "Arissa Lavigny-Duval", :id 4723, :population 16494916, :x 78.5, :edsm_id 18297, :security_id 32, :primary_economy_id 9, :simbad_ref "", :state_id 80})
+
+    (ed.db/get-system-faction {:system-id 4723})
+    =>
+    ({:system_id 4723, :minor_faction_id 18979, :updated_at 1503711664, :state_id 80, :influence 42.7}
+     {:system_id 4723, :minor_faction_id 15535, :updated_at 1503711664, :state_id 80, :influence 5.6}
+     {:system_id 4723, :minor_faction_id 37614, :updated_at 1503711664, :state_id 16, :influence 3.8}
+     {:system_id 4723, :minor_faction_id 18978, :updated_at 1503711664, :state_id 80, :influence 10.9}
+     {:system_id 4723, :minor_faction_id 18977, :updated_at 1503711664, :state_id 64, :influence 12.9}
+     {:system_id 4723, :minor_faction_id 18976, :updated_at 1503711664, :state_id 64, :influence 15.5}
+     {:system_id 4723, :minor_faction_id 18975, :updated_at 1503711664, :state_id 16, :influence 8.6})
 
 You can setup a clean database with:
 
@@ -57,11 +74,11 @@ not reinitialise the database ({:new-db false} in config.edn).
 
 - database definitions
 - dev environment
+- Import all factions: populate 'factions' (key: faction_id)
+- Import all systems_populated, populate 'system' (key: system_id, updated_at), 'system_faction' (key: system_id, faction_id)
 
 ## TODO
 
-- Import all factions: populate 'factions' (key: faction_id)
-- Import all systems_populated, populate 'system' (key: system_id, updated_at), 'system_faction' (key: system_id, faction_id)
 - Process FSDJump events and update 'system_faction'
 
 How does time affect the data? It doesn't. Time is handled by influxDB.
@@ -405,9 +422,23 @@ lack of precision.
 It is simply good enough to get a distance between the stored version and the incoming version and say it is
 within a level as shown.
 
+# Faction DB Query
+
+running a query against local db
+
+    $ psql ed-factions ed
+    => with mcmafia (name) as (values ('Kulici')) select (jl_within(name, 25.1)).* from mcmafia;
+
+      sys   |       name       |     pop     |   d   | fc | pc | inf
+    --------+------------------+-------------+-------+----+----+------
+     Kulici | Kulici           |    28244875 |  0.00 |  6 |  0 | 36.7
+     Kulici | Wargis           |    31900297 |  5.37 |  7 |  1 | 62.9
+     ...
+
+
 ## License
 
-Copyright © 2017 Mark Fisher
+Copyright © 2017-2018 Mark Fisher
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

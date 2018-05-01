@@ -29,12 +29,12 @@
  {:update-url             "tcp://eddn-relay.elite-markets.net:9500"
 
   :Xfactions              "./downloads/factions.jsonl"
-  :factions               "./downloads/factions.1.jsonl"
-  :systems-populated     "./downloads/systems_populated.jsonl"
+  :XXfactions               "./downloads/factions.1.jsonl"
+  :XXsystems-populated     "./downloads/systems_populated.jsonl"
   ;; :systems-populated      "https://eddb.io/archive/v5/systems_populated.jsonl"
   ;; just keep them for reference
-  :live-factions          "https://eddb.io/archive/v5/factions.jsonl"
-  :live-systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"
+  :factions          "https://eddb.io/archive/v5/factions.jsonl"
+  :systems-populated "https://eddb.io/archive/v5/systems_populated.jsonl"
 
   :journal-schema         "http://schemas.elite-markets.net/eddn/journal/1"}
 

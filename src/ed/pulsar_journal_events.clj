@@ -15,16 +15,19 @@
   "input:
   jump-data: {... :Factions [{ :Allegiance \"Federation\" :FactionState \"CivilWar\" :Influence 0.0412 :Name \"FooSystem\" :Government \"Corporate\" } ... ]
   system: {:id 1 ... :minor-faction-presences [{:minor-faction-id 500 :state-id 1 :influence 4.56 :state \"Civil War\"}]
+  Note the jump-data influences are 100th the system values.
+  Also note that the faction state in jump-data is missing spaces.
+  Simplify the faction data into 2 list of maps of format [{:id 500 :state-id 5 :influence 4.56} {...}]
+  Then compare them, if not same, save the jump-data version
   "
   [jump-data system]
-  (let [foo :foo]
-    )
+  true
   )
 
 (defsfn update-system-from-fsdjump!
   [jump-data system]
   (let [current-controlling-faction (d/get-faction (:controlling-minor-faction-id system))
-        new-controlling-faction (d/get-faction-by-name {:name (:SystemFaction data)})
+        new-controlling-faction (d/get-faction-by-name {:name (:SystemFaction jump-data)})
         current-state-id (:state-id system)
         new-state-id (l/lookup :state (:FactionState jump-data))
         current-allegiance-id (:allegiance-id system)
