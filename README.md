@@ -5,6 +5,28 @@ A Clojure library for Elite Dangerous Tools:
 1. Factions to InfluxDB
 2. DiscordBot
 
+THIS IS VERY MUCH A WORK IN PROGRESS PROJECT!
+I doubt it will be useful to anyone other than myself or for seeing my crap CLJ skillz.
+
+Completed:
+
+1. Database design for holding a single value of any system's state
+2. Loading nightly dumps into datbase
+
+Currently, the project just loads base data in, there are routines for listening to journal changes, but
+nothing is update by them.
+
+I haven't worked out how to detect when the data is complete yet to kill off the pulse actors for loading it.
+
+The idea of using InfluxDB will probably go away, as since writing this, I discovered EDSM's data, so this project
+was more for doing some more clojure, and also writing some queries against a local database for things
+like working out what systems are within range of a given system, top influence etc for planning BG
+expansion.
+
+Also, I haven't yet decided on whether to keep historical data locally if not doing the influxDB.
+
+Basically this is a project looking for some requirements to guide its development.
+
 ## DESIGN
 
 Nightly data and updates will be applied to a local d/b to hold
@@ -383,6 +405,8 @@ There would be actors for:
 This would give us chance to write massively concurrent simulations of influence changes.
 Factions could become 'aware' of other factions in their neighbourhoods.
 
+How would new factions come about?
+
 ## PROCESSING ACTORS
 
 Actor for processing the system/faction jsonl entries to update the d/b, we just push lots of messages
@@ -434,6 +458,12 @@ running a query against local db
      Kulici | Kulici           |    28244875 |  0.00 |  6 |  0 | 36.7
      Kulici | Wargis           |    31900297 |  5.37 |  7 |  1 | 62.9
      ...
+
+See analysis.clj for other functions.
+
+A useful one for getting all loading data counts is:
+
+    select (select count(*) from system) as systems, (select count(*) from system_faction) as sys_fac, (select count(*) from faction) as factions;
 
 
 ## License
