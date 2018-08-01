@@ -27,7 +27,7 @@
 
                  ;; DB management
                  [com.layerware/hugsql "0.4.8"]
-                 [org.postgresql/postgresql "9.4.1212"]
+                 [org.postgresql/postgresql "42.2.2"]
                  [hikari-cp "2.4.0"]
                  [conman "0.7.8"]
                  [mount "0.1.12"]

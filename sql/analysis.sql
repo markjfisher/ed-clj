@@ -342,3 +342,42 @@ begin
   order by dist;
 end
 $func$ LANGUAGE plpgsql;
+
+
+-- IMPROVED version, with update time and faction name
+DROP FUNCTION ed_within2(character varying,numeric);
+create or replace function
+  ed_within2(
+  _system_name VARCHAR(200),
+  _max_dist numeric
+)
+  returns table (
+    sys  VARCHAR(200),
+    name VARCHAR(200),
+    upd timestamp,
+    pop BIGINT,
+    d NUMERIC,
+    fc BIGINT,
+    pc BIGINT,
+    inf NUMERIC,
+    fname TEXT
+  ) as
+$func$
+begin
+  return query
+  select
+    _system_name,
+    s.name,
+    to_timestamp(s.updated_at) at time zone 'UTC',
+    s.population,
+    round(cast (sqrt((s.x - px)^2 + (s.y - py)^2 + (s.z - pz)^2) as numeric), 2) as dist,
+    (select count(*) from system_faction sf where sf.system_id = s.id group by sf.system_id) as fc,
+    (select count(*) from faction f, system_faction sf where f.id = sf.minor_faction_id and sf.system_id = s.id and f.is_player_faction = true) as pc,
+    (select round(cast (max(sf.influence) as numeric), 1) from system_faction sf where sf.system_id = s.id) as inf,
+    array_to_string(array((select f.name from faction f, system_faction sf where f.id = sf.minor_faction_id and sf.system_id = s.id and sf.influence = (select max(ysf.influence) from system_faction ysf where ysf.system_id = s.id))), ', ') as fname
+  from system s
+  inner join (select x as px, y as py, z as pz from system ps where ps.name = _system_name) as p on 1=1
+  where sqrt((x - px)^2 + (y - py)^2 + (z - pz)^2) < _max_dist
+  order by dist;
+end
+$func$ LANGUAGE plpgsql;
